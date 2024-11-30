@@ -2,8 +2,8 @@
 
 namespace Database\Seeders;
 
-use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\PaymentMethod;
 
 class PaymentMethodSeeder extends Seeder
 {
@@ -12,9 +12,6 @@ class PaymentMethodSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('PaymentMethod')->insert([
-            'name' => Str::random(10),
-            'description' => Str::random(10)
-        ]);
+        PaymentMethod::factory()->count(10)->create();
     }
 }

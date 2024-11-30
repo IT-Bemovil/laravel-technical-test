@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers;
 use App\Models\PaymentMethod;
-use App\Models\PaymentMethodOption;
 use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
 
 class PaymentMethodController extends Controller
@@ -11,17 +12,23 @@ class PaymentMethodController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
         try {
-            $metodos = PaymentMethod::get(['id','name','created_at']);
-            $metodos_opciones = PaymentMethodOption::with(['PaymentMethod'])
-                ->get(['payment_method_id','key','value']);
-                
-            $metodos['cantidad_opciones'] = count($metodos_opciones);
+            $porPagina = 2;
+            $pagina = $request->input('page', 1);
+            $metodos = PaymentMethod::withCount('PaymentMethodOption')->paginate($porPagina, ['*'], 'page', $pagina);
+            $metodos_final = new ResourceCollection($metodos->map(function($metodo) {
+                return [
+                    'id' => $metodo->id,
+                    'name' => $metodo->name,
+                    'created_at' => $metodo->created_at,
+                    'options_count' => $metodo->options_count
+                ];
+            }));
             return response()->json([
                 'status' => 'success',
-                'data' => $metodos
+                'data' => $metodos_final
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -54,15 +61,24 @@ class PaymentMethodController extends Controller
     public function show($id)
     {
         try {
-            $metodos = PaymentMethod::get(['id','name','created_at'])->where('id', $id);
-            $metodos_opciones = PaymentMethodOption::with(['PaymentMethod'])
-            ->where('payment_method_id', $id)
-                ->get(['payment_method_id','key','value']);
-                
-            $metodos['metodo_opciones'] = $metodos_opciones;
+            $paymentMethod = PaymentMethod::with('PaymentMethodOption:id,payment_method_id,key,value')
+            ->findOrFail($id);
+
+            $metodos_final = new JsonResource([
+                'id' => $paymentMethod->id,
+                'name' => $paymentMethod->name,
+                'created_at' => $paymentMethod->created_at,
+                'opciones' => $paymentMethod->options->map(function($option) {
+                    return [
+                        'id' => $option->id,
+                        'key' => $option->key,
+                        'value' => $option->value
+                    ];
+                })
+            ]);
             return response()->json([
                 'status' => 'success',
-                'data' => $metodos
+                'data' => $metodos_final
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
