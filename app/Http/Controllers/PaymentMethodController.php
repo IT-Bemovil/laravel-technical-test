@@ -18,6 +18,17 @@ class PaymentMethodController extends Controller
     public function show($id): JsonResponse{
         $paymentMethod = PaymentMethod::with('options')->findOrFail($id);
 
-        return response()->json($paymentMethod);
+        return response()->json([
+            'id' => $paymentMethod->id,
+            'name' => $paymentMethod->name,
+            'created_at' => $paymentMethod->created_at,
+            'options' => $paymentMethod->options->map(function($option){
+                return [
+                    'id' => $option->id,
+                    'key' => $option->key,
+                    'value' => $option->value,
+                ];
+            }),
+        ]);
     }
 }
