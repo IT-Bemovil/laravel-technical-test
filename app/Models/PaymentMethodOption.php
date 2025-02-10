@@ -9,6 +9,12 @@ class PaymentMethodOption extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'payment_method_id',
+        'key',
+        'value',
+    ];
+    
     public function paymentMethod()
     {
         return $this->belongsTo(PaymentMethod::class);

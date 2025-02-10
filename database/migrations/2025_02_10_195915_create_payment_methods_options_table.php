@@ -13,7 +13,7 @@ class CreatePaymentMethodsOptionsTable extends Migration
      */
     public function up()
     {
-        Schema::create('payment_methods_options', function (Blueprint $table) {
+        Schema::create('payment_method_options', function (Blueprint $table) {
             $table->id();
             $table->foreignId('payment_method_id')->constrained('payment_methods')->onDelete('cascade');
             $table->string('key', 50);
@@ -29,6 +29,6 @@ class CreatePaymentMethodsOptionsTable extends Migration
      */
     public function down()
     {
-        Schema::dropIfExists('payment_methods_options');
+        Schema::dropIfExists('payment_method_options');
     }
 }

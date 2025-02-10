@@ -9,6 +9,11 @@ class PaymentMethod extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'name',
+        'description'
+    ];
+
     public function options()
     {
         return $this->hasMany(PaymentMethodOption::class);
